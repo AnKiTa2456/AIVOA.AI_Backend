@@ -92,6 +92,41 @@ uvicorn app.main:app --reload --port 8000
 
 API docs: http://localhost:8000/docs
 
+## Verifying the Database
+
+Tables are created automatically on startup, and 5 sample HCPs are seeded. To confirm data
+is actually being persisted (not just returned as in-memory responses), connect with `psql`:
+
+```bash
+psql -h localhost -p 5432 -U hcp_user -d hcp_crm
+# password: hcp_pass (or `export PGPASSWORD=hcp_pass` first to skip the prompt)
+```
+
+Useful queries once connected:
+
+```sql
+\dt                                                     -- list tables
+SELECT name, specialty, institution FROM hcps;
+SELECT id, hcp_id, interaction_type, sentiment, topics_discussed, source FROM interactions;
+SELECT id, interaction_id, description, due_date, status FROM follow_ups;
+SELECT session_id, role, content FROM chat_messages ORDER BY created_at;
+\q
+```
+
+Or as one-liners without entering the `psql` shell:
+
+```bash
+psql -h localhost -U hcp_user -d hcp_crm -c "SELECT * FROM interactions;"
+```
+
+You should see rows appear after saving via the structured form or logging/editing via the
+chat panel — that's the proof the LangGraph tools are writing real data, not just returning
+canned text. A GUI client (TablePlus, Postico, DBeaver) works too — connect with host
+`localhost`, port `5432`, user `hcp_user`, password `hcp_pass`, database `hcp_crm`.
+
+> If you're running Postgres via `docker compose up -d` instead of a local install, the same
+> credentials apply — Docker just runs the server in a container on the same port.
+
 ## API Overview
 
 | Method | Path | Description |
