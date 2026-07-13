@@ -58,6 +58,11 @@ history for context, and proactively recommending next-best-actions.
 - Groq LLMs: `gemma2-9b-it` (primary), `llama-3.3-70b-versatile` (automatic fallback)
 - PostgreSQL (MySQL also supported via `DATABASE_URL`)
 
+> **Note:** Groq has since decommissioned `gemma2-9b-it` server-side. Every Groq call in
+> this codebase (`app/agent/graph.py`, `app/agent/extraction.py`) is wrapped to catch that
+> and transparently retry on `llama-3.3-70b-versatile`, so the app keeps working without any
+> config change — if Groq reinstates/replaces the primary model, just update `GROQ_MODEL`.
+
 ## Running locally
 
 ### 1. Database (PostgreSQL via Docker)

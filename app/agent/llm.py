@@ -42,8 +42,3 @@ def invoke_with_fallback(messages, temperature: float = 0.2):
         return get_primary_llm(temperature).invoke(messages)
     except Exception:
         return get_fallback_llm(temperature).invoke(messages)
-
-
-def get_chat_llm(temperature: float = 0.2) -> ChatGroq:
-    """LLM instance used for the LangGraph agent's tool-calling loop."""
-    return get_primary_llm(temperature)

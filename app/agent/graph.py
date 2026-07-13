@@ -13,7 +13,7 @@ from langgraph.graph.message import add_messages
 from langgraph.prebuilt import ToolNode, tools_condition
 from typing import Annotated, TypedDict
 
-from app.agent.llm import get_chat_llm
+from app.agent.llm import get_fallback_llm, get_primary_llm
 from app.agent.tools import ALL_TOOLS
 
 SYSTEM_PROMPT = """You are the AI assistant embedded in a pharma field rep's CRM, on the \
@@ -39,13 +39,17 @@ class AgentState(TypedDict):
 
 
 def _agent_node(state: AgentState):
-    llm = get_chat_llm().bind_tools(ALL_TOOLS)
     messages = state["messages"]
     if not messages or messages[0].type != "system":
         from langchain_core.messages import SystemMessage
 
         messages = [SystemMessage(content=SYSTEM_PROMPT)] + messages
-    response = llm.invoke(messages)
+
+    try:
+        response = get_primary_llm().bind_tools(ALL_TOOLS).invoke(messages)
+    except Exception:
+        # e.g. the primary Groq model was deprecated/decommissioned server-side.
+        response = get_fallback_llm().bind_tools(ALL_TOOLS).invoke(messages)
     return {"messages": [response]}
 
 
