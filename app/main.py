@@ -10,7 +10,10 @@ app = FastAPI(title="AI-First HCP CRM API", version="1.0.0")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[settings.frontend_origin, "http://localhost:5173", "http://127.0.0.1:5173"],
+    # Vite auto-increments the port (5173, 5174, ...) if one is already taken by another
+    # project on the same machine, so allow the whole local dev range rather than just 5173.
+    allow_origin_regex=r"http://(localhost|127\.0\.0\.1):517\d",
+    allow_origins=[settings.frontend_origin],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
